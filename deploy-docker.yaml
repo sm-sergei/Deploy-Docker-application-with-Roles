@@ -1,0 +1,116 @@
+---
+- name: Install Python3
+  hosts: ubuntu
+  gather_facts: false
+  become: yes
+  tasks:
+   - name: Install Python3
+     vars:
+       ansible_python_interpreter: /usr/bin/python2
+     apt: 
+       name: python3
+       state: present
+       update_cache: yes
+
+- name: Install required system packages, add GPG key and Docker repository
+  hosts: ubuntu
+  become: yes
+  tasks:
+   - name: Install the required system packages
+     apt: 
+       name: "{{ item }}"   
+       state: present
+       update_cache: yes
+     loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - software-properties-common
+        - python3-pip  
+   - name: Install the Docker GPG APT key
+     apt_key:
+       url: https://download.docker.com/linux/ubuntu/gpg
+       state: present
+   - name: Add the official Docker repository to the apt sources.
+     apt_repository: 
+       repo: deb https://download.docker.com/linux/ubuntu focal stable
+       state: present
+       filename: docker
+ 
+- name: Install Docker and Docker-compose
+  hosts: ubuntu
+  become: yes
+  tasks:
+   - name: Update apt packages
+     apt:
+       update_cache: yes
+       force_apt_get: yes
+       cache_valid_time: 3600
+   - name: Install Docker
+     apt:
+       name: docker-ce
+       state: present
+   - name: Install Docker-compose
+     get_url: 
+       url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-{{ lookup('pipe', 'uname -m') }}
+       dest: /usr/local/bin/docker-compose
+       mode: +x
+
+- name: Start docker deamon
+  hosts: ubuntu
+  become: yes
+  tasks:
+   - name: Start docker daemon
+     service: 
+       name: docker
+       state: started
+       enabled: yes
+   - name: Install docker and python module
+     pip: 
+       name:
+         - docker
+         - requests  
+         - docker-compose    
+
+- name: Add user to the docker group
+  hosts: ubuntu
+  become: yes
+  tasks:
+   - name: Add user to the docker group
+     user:
+       name: "{{ ansible_user }}" 
+       append: yes
+       groups: docker
+   - name: Reconnect to remote server
+     meta: reset_connection
+
+#- name: Test docker pull 
+#  hosts: ubuntu
+#  tasks:
+#   - name: Pull redis image
+#     docker_image: 
+#       name: redis
+#       source: pull
+
+- name: Start docker container
+  hosts: ubuntu
+  vars_prompt:
+   - name: docker_username
+     prompt: Enter username for private docker registry
+   - name: docker_password
+     prompt: Enter password for private docker registry
+  tasks:
+   - name: Copy docker-compose.yaml file
+     copy:
+       src: /home/sergei/docker-project/docker-compose.yaml
+       dest: /home/sergei/docker-compose.yaml
+   - name: Docker login
+     docker_login:
+       registry_url: https://index.docker.io/v1
+       username: "{{ docker_username }}"
+       password: "{{ docker_pasword }}"
+   - name: Start container from docker-compose
+     docker_compose:
+       project_src: /home/sergei/docker-compose.yaml
+       state: present
