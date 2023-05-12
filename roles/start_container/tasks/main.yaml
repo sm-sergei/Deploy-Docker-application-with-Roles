@@ -8,7 +8,7 @@
   tasks:
    - name: Copy docker-compose.yaml file
      copy:
-       src: /home/sergei/docker-project/docker-compose.yaml
+       src: docker-compose.yaml
        dest: /home/sergei/docker-compose.yaml
    - name: Docker login
      docker_login:
