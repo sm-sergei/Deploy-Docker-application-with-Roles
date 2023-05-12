@@ -76,14 +76,8 @@
 - name: Add user to the docker group
   hosts: ubuntu
   become: yes
-  tasks:
-   - name: Add user to the docker group
-     user:
-       name: "{{ ansible_user }}" 
-       append: yes
-       groups: docker
-   - name: Reconnect to remote server
-     meta: reset_connection
+  roles:
+   - create_user
 
 #- name: Test docker pull 
 #  hosts: ubuntu
@@ -100,17 +94,5 @@
      prompt: Enter username for private docker registry
    - name: docker_password
      prompt: Enter password for private docker registry
-  tasks:
-   - name: Copy docker-compose.yaml file
-     copy:
-       src: /home/sergei/docker-project/docker-compose.yaml
-       dest: /home/sergei/docker-compose.yaml
-   - name: Docker login
-     docker_login:
-       registry_url: https://index.docker.io/v1
-       username: "{{ docker_username }}"
-       password: "{{ docker_pasword }}"
-   - name: Start container from docker-compose
-     docker_compose:
-       project_src: /home/sergei/docker-compose.yaml
-       state: present
+  roles:
+   - start_container
