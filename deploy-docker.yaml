@@ -12,54 +12,18 @@
   roles:
    - install_dependencies
  
-- name: Install Docker and Docker-compose
+- name: Install Docker, Docker-compose and start Docker daemon
   hosts: ubuntu
   become: yes
-  tasks:
-   - name: Update apt packages
-     apt:
-       update_cache: yes
-       force_apt_get: yes
-       cache_valid_time: 3600
-   - name: Install Docker
-     apt:
-       name: docker-ce
-       state: present
-   - name: Install Docker-compose
-     get_url: 
-       url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-{{ lookup('pipe', 'uname -m') }}
-       dest: /usr/local/bin/docker-compose
-       mode: +x
+  roles:
+   - install_and_start_docker
 
-- name: Start docker deamon
-  hosts: ubuntu
-  become: yes
-  tasks:
-   - name: Start docker daemon
-     service: 
-       name: docker
-       state: started
-       enabled: yes
-   - name: Install docker and python module
-     pip: 
-       name:
-         - docker
-         - requests  
-         - docker-compose    
 
 - name: Add user to the docker group
   hosts: ubuntu
   become: yes
   roles:
    - create_user
-
-#- name: Test docker pull 
-#  hosts: ubuntu
-#  tasks:
-#   - name: Pull redis image
-#     docker_image: 
-#       name: redis
-#       source: pull
 
 - name: Start docker container
   hosts: ubuntu
