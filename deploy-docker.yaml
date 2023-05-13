@@ -9,28 +9,8 @@
 - name: Install required system packages, add GPG key and Docker repository
   hosts: ubuntu
   become: yes
-  tasks:
-   - name: Install the required system packages
-     apt: 
-       name: "{{ item }}"   
-       state: present
-       update_cache: yes
-     loop:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg
-        - software-properties-common
-        - python3-pip  
-   - name: Install the Docker GPG APT key
-     apt_key:
-       url: https://download.docker.com/linux/ubuntu/gpg
-       state: present
-   - name: Add the official Docker repository to the apt sources.
-     apt_repository: 
-       repo: deb https://download.docker.com/linux/ubuntu focal stable
-       state: present
-       filename: docker
+  roles:
+   - install_dependencies
  
 - name: Install Docker and Docker-compose
   hosts: ubuntu
