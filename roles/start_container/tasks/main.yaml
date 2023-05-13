@@ -1,22 +1,14 @@
-- name: Start docker container
-  hosts: ubuntu
-  vars_prompt:
-   - name: docker_username
-     prompt: Enter username for private docker registry
-   - name: docker_password
-     prompt: Enter password for private docker registry
-  tasks:
-   - name: Copy docker-compose.yaml file
-     copy:
-       src: docker-compose.yaml
-       dest: /home/sergei/docker-compose.yaml
-   - name: Docker login
-     docker_login:
-       registry_url: https://index.docker.io/v1
-       username: "{{ docker_username }}"
-       password: "{{ docker_pasword }}"
-   - name: Start container from docker-compose
-     docker_compose:
-       project_src: /home/sergei/docker-compose.yaml
-       state: present
+- name: Copy docker-compose.yaml file
+  copy:
+    src: docker-compose.yaml
+    dest: /home/sergei/docker-compose.yaml
+- name: Docker login
+  docker_login:
+    registry_url: "{{ registry_url }}"
+    username: "{{ docker_username }}"
+    password: "{{ docker_pasword }}"
+- name: Start container from docker-compose
+  docker_compose:
+    project_src: /home/sergei/docker-compose.yaml
+    state: present
 
