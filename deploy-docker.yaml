@@ -3,14 +3,8 @@
   hosts: ubuntu
   gather_facts: false
   become: yes
-  tasks:
-   - name: Install Python3
-     vars:
-       ansible_python_interpreter: /usr/bin/python2
-     apt: 
-       name: python3
-       state: present
-       update_cache: yes
+  roles:
+   - install_python3
 
 - name: Install required system packages, add GPG key and Docker repository
   hosts: ubuntu
