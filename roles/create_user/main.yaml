@@ -1,8 +1,0 @@
-- name: Add user to the docker group
-  user:
-     name: "{{ ansible_user }}"
-     append: yes
-     groups: docker
- - name: Reconnect to remote server
-   meta: reset_connection
-
